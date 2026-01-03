@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setUserDetails } from './../../store/userSlice';
 import SummaryApi from '../../common';
 import { toast } from 'react-toastify';
+import { clearTokens, getAccessToken } from '../../utils/authUtils';
 import './Nav.css';
 
 const Navbar = () => {
@@ -27,18 +28,30 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
+      const token = getAccessToken();
       const response = await fetch(SummaryApi.logout.url, {
         method: SummaryApi.logout.method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         credentials: 'include',
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
+      
+      // Clear tokens from localStorage
+      clearTokens();
+      
       toast.success(data.message);
       dispatch(setUserDetails(null));
       navigate('/login');
     } catch (error) {
-      toast.error(error.message);
+      // Even if server logout fails, clear local tokens
+      clearTokens();
+      dispatch(setUserDetails(null));
+      toast.error(error.message || 'Logged out');
+      navigate('/login');
     }
   };
 

@@ -11,6 +11,14 @@ const SummaryApi = {
         url: backendURI + '/api/login',
         method: "POST"
     },
+    googleAuth: {
+        url: backendURI + '/api/auth/google',
+        method: "POST"
+    },
+    refreshToken: {
+        url: backendURI + '/api/refresh-token',
+        method: "POST"
+    },
     current_user: {
         url: backendURI + '/api/userdetails',
         method: "GET"

@@ -3,9 +3,11 @@ const router=express.Router();
 //User
 const signUp=require('../controller/User/SignUp');
 const login=require('../controller/User/Login');
+const googleAuth=require('../controller/User/GoogleAuth');
 const UserDetails=require('../controller/User/UserDetails');
 const authToken = require('../middlewares/authToken');
 const userLogOut=require('../controller/User/Logout');
+const refreshToken=require('../controller/User/RefreshToken');
 //Blog
 const BlogFetch=require('../controller/Blog/BlogFetch');
 const BlogCreate=require('../controller/Blog/BlogCreate');
@@ -18,6 +20,8 @@ const blogUpdate=require('../controller/Blog/BlogEdit');
 //User
 router.post('/signup',signUp);
 router.post('/login',login);
+router.post('/auth/google',googleAuth);
+router.post('/refresh-token',refreshToken);
 router.get('/userdetails',authToken,UserDetails);
 router.get('/logout',authToken,userLogOut);
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import SummaryApi from '../../common';
+import { apiGet } from '../../utils/authUtils';
 import './BlogDetail.css';
 
 const BlogDetail = () => {
@@ -12,11 +13,7 @@ const BlogDetail = () => {
   useEffect(() => {
     const fetchBlogDetails = async () => {
       try {
-        const response = await fetch(`${SummaryApi.BlogFetchById.url}/${id}`, {
-          method: SummaryApi.BlogFetchById.method,
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        });
+        const response = await apiGet(`${SummaryApi.BlogFetchById.url}/${id}`);
 
         const result = await response.json();
 

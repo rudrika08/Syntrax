@@ -6,6 +6,7 @@ import { Link, Outlet } from 'react-router-dom';
 import { BlogContext } from './../../context/BlogContext';
 import Modal from 'react-modal'; // Import react-modal
 import UpdateBlog from './UpdateBlog/UpdateBlog'; // Import UpdateBlog
+import { apiGet, apiDelete } from '../../utils/authUtils';
 
 const AdminPanel = () => {
     const [posts, setPosts] = useState([]);
@@ -15,13 +16,7 @@ const AdminPanel = () => {
 
     const fetchBlog = async () => {
         try {
-            const response = await fetch(SummaryApi.BlogFetchById.url, {
-                method: SummaryApi.BlogFetchById.method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
+            const response = await apiGet(SummaryApi.BlogFetchById.url);
 
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
@@ -41,14 +36,7 @@ const AdminPanel = () => {
 
     const handleDelete = async (id) => {
         try {
-            const response = await fetch(SummaryApi.BlogDelete.url, {
-                method: SummaryApi.BlogDelete.method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id }),
-                credentials: 'include',
-            });
+            const response = await apiDelete(SummaryApi.BlogDelete.url, { id });
 
             if (!response.ok) {
                 throw new Error('Network response was not ok');

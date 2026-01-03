@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import './CreateBlog.scss'; 
+import './CreateBlog.scss';
+import { apiPost } from '../../utils/authUtils'; 
 
 const categories = [
     'All Categories',
@@ -23,23 +24,14 @@ const CreateBlog = () => {
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        const token = localStorage.getItem('token');
         e.preventDefault();
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URI}/api/blogCreate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    title,
-                    content,
-                    image,
-                    category: selectedCategory,
-                }),
+            const response = await apiPost(`${import.meta.env.VITE_BACKEND_URI}/api/blogCreate`, {
+                title,
+                content,
+                image,
+                category: selectedCategory,
             });
 
             const data = await response.json();

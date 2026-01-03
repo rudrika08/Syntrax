@@ -369,3 +369,65 @@ body.login-body {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  gap: 1rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 127, 0.3), transparent);
+}
+
+.divider span {
+  color: #b0b0b0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Google Login Container */
+.google-login-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.google-login-container > div {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#google-signin-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#google-signin-button > div {
+  width: 100% !important;
+}
+
+#google-signin-button iframe {
+  width: 100% !important;
+}
+
+.google-loading {
+  padding: 1rem 2rem;
+  background: rgba(40, 40, 40, 0.6);
+  border: 2px solid rgba(0, 255, 127, 0.2);
+  border-radius: 0.75rem;
+  color: #b0b0b0;
+  font-size: 0.875rem;
+  text-align: center;
+  animation: pulse 1.5s ease-in-out infinite;
+}

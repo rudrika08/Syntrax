@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import styles from './ViewBlogs.module.scss';
 import SummaryApi from '../../../common';
+import { apiGet, apiDelete } from '../../../utils/authUtils';
 
 const ViewBlogs = () => {
   const [posts, setPosts] = useState([]);
@@ -14,13 +15,7 @@ const ViewBlogs = () => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const response = await fetch(SummaryApi.BlogFetchById.url, {
-          method: SummaryApi.BlogFetchById.method,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
+        const response = await apiGet(SummaryApi.BlogFetchById.url);
         const data = await response.json();
         setPosts(data.data);
       } catch (error) {
@@ -35,14 +30,7 @@ const ViewBlogs = () => {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(SummaryApi.BlogDelete.url, {
-        method: SummaryApi.BlogDelete.method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ id }),
-      });
+      await apiDelete(SummaryApi.BlogDelete.url, { id });
       setPosts(posts.filter((post) => post._id !== id));
       setDeleteConfirm(null);
     } catch (error) {
