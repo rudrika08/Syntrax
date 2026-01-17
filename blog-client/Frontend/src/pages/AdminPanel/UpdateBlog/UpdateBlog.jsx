@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import SummaryApi from '../../../common';
 import { BlogContext } from './../../../context/BlogContext';
+import { apiPost, apiPut } from '../../../utils/authUtils';
 
 const UpdateBlog = ({ blogId, onClose }) => {
   const { fetchBlog } = useContext(BlogContext);
@@ -30,14 +31,7 @@ const UpdateBlog = ({ blogId, onClose }) => {
   // Fetch blog data by ID
   const fetchBlogFn = async () => {
     try {
-      const response = await fetch(SummaryApi.BlogFetchByBlogId.url, {
-        method: SummaryApi.BlogFetchByBlogId.method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ id: blogId }),
-      });
+      const response = await apiPost(SummaryApi.BlogFetchByBlogId.url, { id: blogId });
 
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -73,14 +67,7 @@ const UpdateBlog = ({ blogId, onClose }) => {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch(SummaryApi.BlogEdit.url, {
-        method: SummaryApi.BlogEdit.method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ ...data, id: blogId }),
-      });
+      const response = await apiPut(SummaryApi.BlogEdit.url, { ...data, id: blogId });
 
       if (!response.ok) {
         throw new Error('Network response was not ok');

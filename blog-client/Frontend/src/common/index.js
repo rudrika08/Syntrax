@@ -11,6 +11,14 @@ const SummaryApi = {
         url: backendURI + '/api/login',
         method: "POST"
     },
+    googleAuth: {
+        url: backendURI + '/api/auth/google',
+        method: "POST"
+    },
+    refreshToken: {
+        url: backendURI + '/api/refresh-token',
+        method: "POST"
+    },
     current_user: {
         url: backendURI + '/api/userdetails',
         method: "GET"
@@ -18,6 +26,10 @@ const SummaryApi = {
     logout: {
         url: backendURI + '/api/logout',
         method: "GET"
+    },
+    updateProfile: {
+        url: backendURI + '/api/updateProfile',
+        method: "PUT"
     },
     BlogFetch: {
         url: backendURI + '/api/blog',

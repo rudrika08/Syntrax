@@ -6,6 +6,7 @@ import { Link, Outlet } from 'react-router-dom';
 import { BlogContext } from '../../../context/BlogContext';
 import Modal from 'react-modal';
 import UpdateBlog from '../UpdateBlog/UpdateBlog';
+import { apiGet, apiDelete } from '../../../utils/authUtils';
 
 // Set the app element for accessibility (add this line)
 Modal.setAppElement('#root');
@@ -22,11 +23,7 @@ const EditBlog = () => {
     const fetchBlog = async () => {
         setLoading(true);
         try {
-            const response = await fetch(SummaryApi.BlogFetchById.url, {
-                method: SummaryApi.BlogFetchById.method,
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-            });
+            const response = await apiGet(SummaryApi.BlogFetchById.url);
 
             if (!response.ok) throw new Error('Network response was not ok ' + response.statusText);
             const data = await response.json();
@@ -43,12 +40,7 @@ const EditBlog = () => {
 
     const handleDelete = async (id) => {
         try {
-            const response = await fetch(SummaryApi.BlogDelete.url, {
-                method: SummaryApi.BlogDelete.method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id }),
-                credentials: 'include',
-            });
+            const response = await apiDelete(SummaryApi.BlogDelete.url, { id });
 
             if (!response.ok) throw new Error('Network response was not ok');
 
@@ -79,12 +71,7 @@ const EditBlog = () => {
 
         try {
             const deletePromises = Array.from(selectedPosts).map(id =>
-                fetch(SummaryApi.BlogDelete.url, {
-                    method: SummaryApi.BlogDelete.method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id }),
-                    credentials: 'include',
-                })
+                apiDelete(SummaryApi.BlogDelete.url, { id })
             );
 
             await Promise.all(deletePromises);

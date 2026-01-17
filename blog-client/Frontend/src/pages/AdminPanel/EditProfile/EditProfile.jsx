@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './EditProfile.module.scss';
+import SummaryApi from '../../../common';
+import { apiGet, apiPut } from '../../../utils/authUtils';
+import { toast } from 'react-toastify';
 
 const EditProfile = () => {
   const [formData, setFormData] = useState({
@@ -7,10 +10,39 @@ const EditProfile = () => {
     email: '',
     bio: '',
   });
-
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [profilePicture, setProfilePicture] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+
+  // Fetch user data on mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await apiGet(SummaryApi.current_user.url);
+        const data = await response.json();
+        
+        if (data.success && data.user) {
+          setFormData({
+            name: data.user.username || '',
+            email: data.user.email || '',
+            bio: data.user.bio || '',
+          });
+          if (data.user.profilePicture) {
+            setProfilePicturePreview(data.user.profilePicture);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        toast.error('Failed to load profile data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,26 +86,58 @@ const EditProfile = () => {
   const validate = () => {
     const errors = {};
     if (!formData.name.trim()) errors.name = 'Name is required';
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = 'Invalid email format';
     }
     return errors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validate();
     setFormErrors(errors);
+    
     if (Object.keys(errors).length === 0) {
-      // TODO: handle profile update via backend API call
-      // Include profilePicture file in the API call
-      console.log('Form Data:', formData);
-      console.log('Profile Picture:', profilePicture);
-      alert('Profile updated successfully!');
+      setSaving(true);
+      try {
+        const updateData = {
+          username: formData.name,
+          email: formData.email,
+          bio: formData.bio,
+        };
+
+        // If there's a new profile picture (base64), include it
+        if (profilePicture && profilePicturePreview) {
+          updateData.profilePicture = profilePicturePreview;
+        }
+
+        const response = await apiPut(SummaryApi.updateProfile.url, updateData);
+        const result = await response.json();
+
+        if (result.success) {
+          toast.success('Profile updated successfully!');
+        } else {
+          toast.error(result.message || 'Failed to update profile');
+        }
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        toast.error('Failed to update profile');
+      } finally {
+        setSaving(false);
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -193,13 +257,22 @@ const EditProfile = () => {
             <button type="button" className={styles.cancelButton}>
               Cancel
             </button>
-            <button type="submit" className={styles.saveButton}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                <polyline points="17,21 17,13 7,13 7,21"/>
-                <polyline points="7,3 7,8 15,8"/>
-              </svg>
-              Save Changes
+            <button type="submit" className={styles.saveButton} disabled={saving}>
+              {saving ? (
+                <>
+                  <span className={styles.buttonSpinner}></span>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17,21 17,13 7,13 7,21"/>
+                    <polyline points="7,3 7,8 15,8"/>
+                  </svg>
+                  Save Changes
+                </>
+              )}
             </button>
           </div>
         </form>

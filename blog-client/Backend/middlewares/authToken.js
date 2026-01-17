@@ -1,41 +1,56 @@
 const jwt = require('jsonwebtoken');
+const { verifyAccessToken } = require('../utils/tokenUtils');
 
 async function authToken(req, res, next) {
   try {
-    // Extract token from cookies or authorization header
-    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
+    // Extract access token from cookies or authorization header
+    const accessToken = req.cookies?.accessToken || 
+                        req.cookies?.token || // Backward compatibility
+                        req.headers.authorization?.split(' ')[1];
 
-    if (!token) {
+    if (!accessToken) {
       return res.status(401).json({
-        message: "No token provided",
+        message: "No access token provided",
         data: [],
         error: true,
         success: false,
+        tokenExpired: false
       });
     }
 
-    // Promise-based verification of the token
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) {
+    // Verify the access token
+    try {
+      const decoded = verifyAccessToken(accessToken);
+      // Save the decoded user data to the request object
+      req.user = decoded.data;
+      console.log('Decoded User:', req.user); // For debugging, remove in production
+      next(); // Continue to the next middleware or route handler
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
         return res.status(401).json({
-          message: err.name === "TokenExpiredError" ? "Token has expired" : "Invalid token, log in again",
+          message: "Access token has expired",
           data: [],
           error: true,
           success: false,
+          tokenExpired: true // Flag to trigger token refresh on frontend
         });
       }
-
-      // Save the decoded user data to the request object
-      req.user = decoded.data; 
-      console.log('Decoded User:', req.user);  // For debugging, remove in production
-      next(); // Continue to the next middleware or route handler
-    });
+      
+      return res.status(401).json({
+        message: "Invalid access token, please login again",
+        data: [],
+        error: true,
+        success: false,
+        tokenExpired: false
+      });
+    }
   } catch (err) {
+    console.error("Auth middleware error:", err);
     return res.status(500).json({
       message: "An error occurred during authentication",
       data: [],
       error: true,
-      success: false,
+      success: false
     });
   }
 }
