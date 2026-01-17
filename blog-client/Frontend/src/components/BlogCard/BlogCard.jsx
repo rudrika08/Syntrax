@@ -9,12 +9,17 @@ const BlogCard = ({ blog, viewMode = 'grid' }) => {
   const cardRef = useRef(null);
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'No date';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'No date';
+    
     const options = {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    return date.toLocaleDateString('en-US', options);
   };
 
   const getReadTime = (content) => {
@@ -30,11 +35,20 @@ const BlogCard = ({ blog, viewMode = 'grid' }) => {
   };
 
   const getTimeAgo = (dateString) => {
-    const now = new Date();
+    if (!dateString) return 'Recently';
+    
     const postDate = new Date(dateString);
+    if (isNaN(postDate.getTime())) return 'Recently';
+    
+    const now = new Date();
     const diffTime = Math.abs(now - postDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffMinutes = Math.floor(diffTime / (1000 * 60));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes} min ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
@@ -46,36 +60,13 @@ const BlogCard = ({ blog, viewMode = 'grid' }) => {
     console.log('Navigate to blog:', blog.id);
   };
 
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-
-    const card = cardRef.current;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotateX = (y - centerY) / 10;
-    const rotateY = (centerX - x) / 10;
-
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
-  };
-
-  const handleMouseLeave = () => {
-    if (!cardRef.current) return;
-    cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
-    setIsHovered(false);
-  };
   const navigate = useNavigate();
   return (
     <article
       className={`blog-card ${viewMode} ${isHovered ? 'hovered' : ''}`}
       ref={cardRef}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
     >
       <div className="blog-card-content">
@@ -99,15 +90,6 @@ const BlogCard = ({ blog, viewMode = 'grid' }) => {
                   <span>{blog.category}</span>
                 </div>
               )}
-
-              {/* Reading Time Badge */}
-              <div className="read-time-badge">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12,6 12,12 16,14" />
-                </svg>
-                <span>{getReadTime(blog.content)} min</span>
-              </div>
             </div>
           ) : (
             <div className="blog-card-placeholder">
@@ -133,7 +115,7 @@ const BlogCard = ({ blog, viewMode = 'grid' }) => {
                   <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                {getTimeAgo(blog.createdAt)}
+                {formatDate(blog.createdAt)}
               </span>
             </div>
 
@@ -151,16 +133,14 @@ const BlogCard = ({ blog, viewMode = 'grid' }) => {
 
           {/* Enhanced Title */}
           <h3 className="blog-card-title">
-            <span className="title-text">{blog.title}</span>
+            <span className="title-text">{truncateText(blog.title, 30)}</span>
             <div className="title-underline"></div>
           </h3>
 
-          {/* Enhanced Description */}
-          {blog.description && (
-            <p className="blog-card-description">
-              {viewMode === 'list' ? blog.description : truncateText(blog.description)}
-            </p>
-          )}
+          {/* One-liner Description from content */}
+          <p className="blog-card-description">
+            {truncateText(blog.description || (blog.content ? blog.content.replace(/<[^>]*>/g, '') : ''), 80)}
+          </p>
 
           {/* Enhanced Tags */}
           {blog.tags && blog.tags.length > 0 && (
@@ -185,24 +165,24 @@ const BlogCard = ({ blog, viewMode = 'grid' }) => {
               {blog.author ? (
                 <>
                   <div className="author-avatar-container">
-                    {blog.author.avatar ? (
+                    {(typeof blog.author === 'object' ? blog.author.avatar : null) ? (
                       <img
                         src={blog.author.avatar}
-                        alt={blog.author.name}
+                        alt={typeof blog.author === 'object' ? blog.author.name : blog.author}
                         className="author-avatar"
                       />
                     ) : (
                       <div className="author-avatar-placeholder">
-                        {blog.author.name ? blog.author.name.charAt(0).toUpperCase() : 'A'}
+                        {(typeof blog.author === 'object' ? blog.author.name : blog.author)?.charAt(0).toUpperCase() || 'A'}
                       </div>
                     )}
                     <div className="author-status"></div>
                   </div>
                   <div className="author-info">
                     <span className="author-name">
-                      {blog.author.name || 'Anonymous'}
+                      {typeof blog.author === 'object' ? blog.author.name : blog.author || 'Anonymous'}
                     </span>
-                    {blog.author.role && (
+                    {typeof blog.author === 'object' && blog.author.role && (
                       <span className="author-role">
                         {blog.author.role}
                       </span>

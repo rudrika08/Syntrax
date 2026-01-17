@@ -1,4 +1,5 @@
 const BlogModel = require("../../model/Blog/BlogModel");
+const UserModel = require("../../model/User/UserModel");
 const blogFetchByBlogIdController = async (req, res) => {
     try{
         const blogId = req.body.id;
@@ -19,10 +20,33 @@ const blogFetchByBlogIdController = async (req, res) => {
                 success: false,
             });
         }
+        // Attach author details (name, profilePicture) if possible
+        const blogObj = blog.toObject();
+        try {
+            const user = await UserModel.findById(blogObj.authorId);
+            if (user) {
+                blogObj.author = {
+                    name: user.username || blogObj.author || 'Anonymous',
+                    avatar: user.profilePicture || null,
+                };
+            } else {
+                // keep existing author field (string) if no user found
+                blogObj.author = {
+                    name: blogObj.author || 'Anonymous',
+                    avatar: null,
+                };
+            }
+        } catch (err) {
+            blogObj.author = {
+                name: blogObj.author || 'Anonymous',
+                avatar: null,
+            };
+        }
+
         return res.status(200).json({
             message: "Blog fetched successfully",
             success: true,
-            data: blog,
+            data: blogObj,
         });
     }catch(error){
         console.error(error);

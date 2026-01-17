@@ -4,14 +4,17 @@ import styles from './AdminDashboard.module.scss';
 import ViewBlogs from '../ViewBlogs/ViewBlogs';
 import EditProfile from '../EditProfile/EditProfile';
 import EditBlog from '../EditBlog/EditBlog';
+import ProfileDashboard from '../ProfileDashboard/ProfileDashboard';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('viewBlogs'); // Default tab
+  const [activeTab, setActiveTab] = useState('profile'); // Default tab
 
   const renderContent = () => {
     switch (activeTab) {
       // case 'createBlog':
       //   return <CreateBlog />;
+      case 'profile':
+        return <ProfileDashboard />;
       case 'viewBlogs':
         return <ViewBlogs />;
       case 'editProfile':
@@ -19,7 +22,7 @@ const AdminDashboard = () => {
       case 'editBlogs':
         return <EditBlog />;
       default:
-        return <CreateBlog />;
+        return <ProfileDashboard />;
     }
   };
 
@@ -34,6 +37,12 @@ const AdminDashboard = () => {
           >
             Create Blog
           </li> */}
+          <li
+            className={activeTab === 'profile' ? styles.active : ''}
+            onClick={() => setActiveTab('profile')}
+          >
+            Profile Dashboard
+          </li>
           <li
             className={activeTab === 'viewBlogs' ? styles.active : ''}
             onClick={() => setActiveTab('viewBlogs')}

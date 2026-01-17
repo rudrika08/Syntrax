@@ -27,6 +27,10 @@ const SummaryApi = {
         url: backendURI + '/api/logout',
         method: "GET"
     },
+    updateProfile: {
+        url: backendURI + '/api/updateProfile',
+        method: "PUT"
+    },
     BlogFetch: {
         url: backendURI + '/api/blog',
         method: "GET"

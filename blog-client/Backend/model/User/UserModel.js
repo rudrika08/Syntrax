@@ -6,6 +6,7 @@ const UserSchema= new mongoose.Schema({
     email:{type:String,sparse:true}, // Optional, for Google users
     googleId:{type:String,sparse:true}, // Google OAuth ID
     profilePicture:{type:String}, // Google profile picture
+    bio:{type:String,default:''}, // User bio
     authProvider:{type:String,enum:['local','google'],default:'local'}
 },{
     timestamps:true

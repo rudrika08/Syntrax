@@ -47,15 +47,23 @@ const ViewBlogs = () => {
     setDeleteConfirm(post);
   };
 
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
+  const formatDate = (dateString) => {
+    if (!dateString) return 'No date';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'No date';
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
-  const truncateContent = (content, maxLength = 100) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength) + '...';
+  const truncateContent = (content, maxLength = 50) => {
+    if (!content) return '';
+    // Strip HTML tags
+    const strippedContent = content.replace(/<[^>]*>/g, '');
+    if (strippedContent.length <= maxLength) return strippedContent;
+    return strippedContent.substring(0, maxLength) + '...';
   };
 
   if (loading) {
@@ -90,7 +98,7 @@ const ViewBlogs = () => {
             <div key={post._id} className={styles.blogCard}>
               <div className={styles.cardHeader}>
                 <span className={styles.blogNumber}>#{index + 1}</span>
-                <span className={styles.blogDate}>{formatDate(post.date)}</span>
+                <span className={styles.blogDate}>{formatDate(post.createdAt)}</span>
               </div>
               
               <div className={styles.cardContent}>
@@ -143,7 +151,7 @@ const ViewBlogs = () => {
           <div className={styles.modalContent}>
             <div className={styles.blogMeta}>
               <span className={styles.publishDate}>
-                Published: {formatDate(currentBlog.date)}
+                Published: {formatDate(currentBlog.createdAt)}
               </span>
             </div>
             <div className={styles.blogContent}>

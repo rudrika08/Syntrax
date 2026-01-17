@@ -118,8 +118,8 @@ const Navbar = () => {
         {user ? (
           <div className="navbar-user">
             <div className="user-avatar" ref={avatarRef} onClick={toggleDropdown}>
-              {user?.profilePic ? (
-                <img src={user.profilePic} alt="User" />
+              {user?.profilePicture ? (
+                <img src={user.profilePicture} alt="User" />
               ) : (
                 <span>{user?.email?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase()}</span>
               )}

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
-const urlRegex = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg))$/i;
+// Matches image URLs or base64 data URIs
+const urlRegex = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg|webp))$/i;
+const base64Regex = /^data:image\/(png|jpg|jpeg|gif|svg|webp);base64,/i;
 
 const categories = [
   'All Categories',
@@ -26,9 +28,10 @@ const BlogSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function (value) {
-        return urlRegex.test(value);
+        // Accept either URL or base64 data URI
+        return urlRegex.test(value) || base64Regex.test(value);
       },
-      message: 'Invalid image URL',
+      message: 'Invalid image format. Must be a valid image URL or base64 data URI',
     },
   },
   author: {
