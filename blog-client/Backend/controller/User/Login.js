@@ -61,9 +61,8 @@ const LoginController = async (req, res) => {
         // Cookie options for access token
         const accessTokenOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none',
-            maxAge: 15 * 60 * 1000 // 15 minutes
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'none', 
         };
 
         // Cookie options for refresh token
